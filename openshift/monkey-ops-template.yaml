@@ -36,18 +36,15 @@ objects:
           - name: APP_NAME
             value: ${APP_NAME}
           - name: PROJECT_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
+            value: ${PROJECT_NAME}
           - name: INTERVAL
             value: ${INTERVAL}
           - name: MODE
-            value: ${MODE}                                             
+            value: ${MODE}
           - name: TZ
             value: ${TZ}
-          image: produban/monkey-ops:1.0.0.RELEASE
-          imagePullPolicy: Always
           name: ${APP_NAME}
+          image: "docker-registry.default.svc:5000/openshift/monkey-ops:stable"
           ports:
           - containerPort: 8080
             protocol: TCP
@@ -66,8 +63,8 @@ objects:
             readOnly: false
         dnsPolicy: ClusterFirst
         restartPolicy: Always
-        serviceAccount: monkey-ops
-        serviceAccountName: monkey-ops
+        serviceAccount: ${SA_NAME}
+        serviceAccountName: ${SA_NAME}
         volumes:
         - metadata:
             items:
@@ -85,10 +82,20 @@ parameters:
   name: APP_NAME
   required: true
   value: monkey-ops
+- description: Project name
+  displayName: Project name
+  name: PROJECT_NAME
+  required: true
+- description: Service Account name
+  displayName: Service Account name
+  name: SA_NAME
+  required: true
+  value: monkey-ops
 - description: Time interval between each actuation of operator monkey
   displayName: Time interval between each actuation of operator monkey. It must be in seconds
   name: INTERVAL
   required: true
+  value: "300"
 - description: Execution Mode, It must be "background", i.e., it runs nonstop, or "rest", i.e., it executes via API Rest.
   displayName: Execution Mode, It must be "background", i.e., it runs nonstop, or "rest", i.e., it executes via API Rest.
   name: MODE
@@ -97,4 +104,4 @@ parameters:
 - description: TimeZone for the running containers.
   displayName: TimeZone
   name: TZ
-  value: Europe/Madrid
+  value: America/Detroit
