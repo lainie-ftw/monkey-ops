@@ -41,8 +41,8 @@ The service accept parameters as flags or environment variables. These are the i
 
 
 #### Setting it up to kill the project it runs in: The Easy Way
-1. make sure the service account associated with your Jenkins master has access to Admin your project
-2. Run the `monkey-go` job [here](https://jenkins-build.aoins.com/job/Build/job/OpenShift/job/monkey-go/) or run the Jenkinsfile on a different master.
+1. make sure the service account associated with your Jenkins master has access to admin your project
+2. Run the `monkey-go` job [here](./Jenkins/).
 
 #### Setting it up to kill the project it runs in: The Long Way
 You'll need to **create a service account** with `edit` permissions within the project that you want to use. The service account is the `SA_NAME` parameter to the new-app template (monkey-ops-template.yml), by default `monkey-ops`.
@@ -80,7 +80,7 @@ By default this image uses the time zone "America/Detroit", if you want to chang
 #### Building
 Do this in case the docker image gets lost. You only need to do this if the image doesn't exist or needs to be rebuilt. The image exists in all OpenShift Corporate Clusters as of this writing.
 
-	$ git https://bitbucket.aoins.com/scm/opsft/monkey-ops
+	$ git https://github.com/joshmsmith/monkey-ops/
 	$ ./build.sh
 
 ### API REST
