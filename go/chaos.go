@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"os"
+	"strings"
 )
 
 //Get all the pods running from a project
@@ -83,7 +85,7 @@ func DeletePod(pod string, chaosInput *ChaosInput) {
 
 	urlDeletePod := chaosInput.Url + "/api/v1/namespaces/" + chaosInput.Project + "/pods/" + pod
 
-	// Set up the HTTP request to get pods
+	// Set up the HTTP request to delete pod
 	req, err := http.NewRequest("DELETE", urlDeletePod, nil)
 	req.Header.Add("Authorization", "Bearer "+chaosInput.Token)
 	resp, err := cli.Do(req)
@@ -108,7 +110,7 @@ func GetDCs(chaosInput *ChaosInput) []DcObject {
 
 	urlGetDCs := chaosInput.Url + "/oapi/v1/namespaces/" + chaosInput.Project + "/deploymentconfigs"
 
-	// Set up the HTTP request to get pods
+	// Set up the HTTP request to get DCs
 	req, err := http.NewRequest("GET", urlGetDCs, nil)
 	req.Header.Add("Authorization", "Bearer "+chaosInput.Token)
 
@@ -215,16 +217,22 @@ func ExecuteChaos(chaosInput *ChaosInput, mode string) {
 	rand.Seed(time.Now().Unix())
 
 	for doChaos := (mode == "background" || (time.Since(start).Seconds() < chaosInput.TotalTime)); doChaos; doChaos = (mode == "background" || (time.Since(start).Seconds() < chaosInput.TotalTime)) {
-		
-		//Randomly choice if delete pod or scale a DC
-		randComponent := random(1, 3)
 
-		switch randComponent {
+		log.Println("Monkey wakes up! Time for chaos!")
+		//Randomly choose if delete pod or scale a DC
+		//component := random(1, 3)
+		component := 1 //pods only
+
+		switch component {
 		case 1:
 			pods := GetPods(chaosInput.Token, chaosInput.Project, chaosInput.Url)
 			if pods != nil && len(pods) > 0 {
 				randPod := random(0, len(pods))
-				DeletePod(pods[randPod], chaosInput)
+				if(strings.Contains(pods[randPod], os.Getenv("APP_NAME"))) {
+				    log.Println("Prevented Monkey-Ops from attacking itself (pod" + pods[randPod] + ").")
+                } else {
+					DeletePod(pods[randPod], chaosInput)
+                }
 			}
 		case 2:
 			dcs := GetDCs(chaosInput)
@@ -236,11 +244,21 @@ func ExecuteChaos(chaosInput *ChaosInput, mode string) {
 				} else {
 					replicas++
 				}
+				//To avoid Monkey-ops attack itself
+				if dcs[randDc].Name ==  os.Getenv("APP_NAME"){
+					log.Println("Prevent Monkey-Ops from attacking itself.")
+					if randDc == 0 {
+						randDc ++
+					} else {
+						randDc --
+					}
+				}
 				scaleDC(dcs[randDc].Name, chaosInput, replicas)
 			}
 		}
 
 		//Waiting for the next monkey action
+		log.Println("Monkey goes to sleep: zzz...")
 		time.Sleep(time.Second * time.Duration(chaosInput.Interval))
 	}
 

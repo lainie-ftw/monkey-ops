@@ -11,8 +11,10 @@ import (
 
 func main() {
 
+	//TODO: API_SERVER env variable never actually used, can be removed
 	flag.String("API_SERVER", "", "API Server URL")
 	flag.String("PROJECT_NAME", "", "Project to get crazy")
+	//TODO: TOKEN env variable never actually used, can be removed
 	flag.String("TOKEN", "", "Bearer token with edit grants to access to the Openshift project")
 	flag.Float64("INTERVAL", 30, "interval time in seconds")
 	flag.String("MODE", "background", "Execution mode: background or rest")
@@ -54,7 +56,7 @@ func main() {
 		} else {
 			token = string(tokenBytes[:])
 		}
-		
+
 		//validating some required parameters
 		if (apiServer == "" || project == "" || token == "") {
 			log.Fatal("Required Input Parameters not valid")
@@ -67,8 +69,8 @@ func main() {
 			Interval:  interval,
 			TotalTime: 0,
 		}
-		
-		//Launh the chaos
+
+		//Launch the chaos
 		go ExecuteChaos(&chaosInput, mode)
 	}
 
