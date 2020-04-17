@@ -1,5 +1,5 @@
 
-SET project="claims-user"
+SET project="default"
 echo "create service account monkey-ops in %project%"
 oc project %project%
 oc create serviceaccount  monkey-ops -n %project%
